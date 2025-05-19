@@ -1,12 +1,17 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
-from apps.accounts.views import RegisterAPIView, ResendVerificationCodeAPIView, VerifyAccountAPIView
+from apps.accounts.views import CookieTokenRefreshView, LoginAPIView, LogoutAPIView, PasswordResetConfirmAPIView, PasswordResetRequestAPIView, PasswordResetVerifyAPIView, RegisterAPIView, ResendVerificationCodeAPIView, VerifyAccountAPIView
 
 urlpatterns = [
-    path('', RegisterAPIView.as_view(), name='registration'),
+    path('registration/', RegisterAPIView.as_view(), name='registration'),
+    path('login/', LoginAPIView.as_view(), name='login'),
+    path('logout/', LogoutAPIView.as_view(), name='logout'),
+
+    path('refresh/', CookieTokenRefreshView.as_view(), name='refresh'),
+
     path('verify/', VerifyAccountAPIView.as_view(), name='verify_account'),
-    path('resend-code/', ResendVerificationCodeAPIView.as_view(), name='resend_code'),
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('verify/resend-code/', ResendVerificationCodeAPIView.as_view(), name='resend_code'),
+
+    path('password-reset/request/', PasswordResetRequestAPIView.as_view(), name='password-reset-request'),
+    path('password-reset/verify/', PasswordResetVerifyAPIView.as_view(), name='password-reset-verify'),
+    path('password-reset/confirm/', PasswordResetConfirmAPIView.as_view(), name='password-reset-confirm'),
 ]

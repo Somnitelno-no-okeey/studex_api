@@ -35,6 +35,8 @@ INSTALLED_APPS = [
 
     'apps.accounts',
     'apps.common',
+    'apps.disciplines',
+    'apps.reviews',
 
 ]
 
@@ -125,7 +127,7 @@ AUTH_USER_MODEL = "accounts.User"
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication', 
+        'apps.accounts.authentication.CookieJWTAuthentication', 
     ]
 }
 
@@ -134,9 +136,21 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+
 }
 
 SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False
 }
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'alxnne@yandex.ru' 
+EMAIL_HOST_PASSWORD = 'lkhmflgyertghdlu'
+
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL =  EMAIL_HOST_USER
+EMAIL_ADMIN = EMAIL_HOST_USER

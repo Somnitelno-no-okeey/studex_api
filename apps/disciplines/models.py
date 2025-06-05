@@ -88,10 +88,6 @@ class Discipline(BaseModel):
         related_name='disciplines',
         verbose_name='Преподаватели'
     )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name='Время последнего обновления'
-    )
     description = models.TextField(verbose_name='Описание дисциплины')
 
     class Meta:

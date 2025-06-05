@@ -159,7 +159,6 @@ class ResendVerificationCodeAPIView(APIView):
     
 
 class PasswordResetRequestAPIView(APIView):
-    permission_classes = [IsAuthenticated]
     @extend_schema(
         request=PasswordResetRequestSerializer,
         examples=[

@@ -13,15 +13,51 @@ class Review(IsDeletedModel):
     review_text = models.TextField(verbose_name='Текст отзыва')
     is_anonymous = models.BooleanField(default=False, verbose_name='Анонимность')
 
-    avg_interest = models.FloatField(null=True, verbose_name="Интересность дисциплины")
-    avg_complexity = models.FloatField(null=True, verbose_name="Уровень сложности")
-    avg_usefulness = models.FloatField(null=True, verbose_name="Полезность содержания")
-    avg_workload = models.FloatField(null=True, verbose_name="Объем нагрузки")
-    avg_logical_structure = models.FloatField(null=True, verbose_name="Логичность структуры")
-    avg_practical_applicability = models.FloatField(null=True, verbose_name="Практическая применимость")
-    avg_teaching_effectiveness = models.FloatField(null=True, verbose_name="Эффективность преподавания")
-    avg_materials_availability = models.FloatField(null=True, verbose_name="Доступность учебных материалов")
-    avg_feedback_support = models.FloatField(null=True, verbose_name="Обратная связь и поддержка")
+    avg_interest = models.FloatField(
+        null=True, 
+        default=None, 
+        verbose_name="Интересность дисциплины"
+    )
+    avg_complexity = models.FloatField(
+        null=True, 
+        default=None,
+        verbose_name="Уровень сложности"
+    )
+    avg_usefulness = models.FloatField(
+        null=True, 
+        default=None, 
+        verbose_name="Полезность содержания"
+    )
+    avg_workload = models.FloatField(
+        null=True, 
+        default=None, 
+        verbose_name="Объем нагрузки"
+    )
+    avg_logical_structure = models.FloatField(
+        null=True, 
+        default=None, 
+        verbose_name="Логичность структуры"
+    )
+    avg_practical_applicability = models.FloatField(
+        null=True, 
+        default=None, 
+        verbose_name="Практическая применимость"
+    )
+    avg_teaching_effectiveness = models.FloatField(
+        null=True, 
+        default=None, 
+        verbose_name="Эффективность преподавания"
+    )
+    avg_materials_availability = models.FloatField(
+        null=True, 
+        default=None, 
+        verbose_name="Доступность учебных материалов"
+    )
+    avg_feedback_support = models.FloatField(
+        null=True, 
+        default=None, 
+        verbose_name="Обратная связь и поддержка"
+    )
 
     class Meta:
         verbose_name = "Отзыв"

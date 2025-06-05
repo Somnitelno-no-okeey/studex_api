@@ -12,3 +12,4 @@ class DisciplineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Discipline
         fields = '__all__'  # Или перечислите конкретные поля, которые хотите включать
+        

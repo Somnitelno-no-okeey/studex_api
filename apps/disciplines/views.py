@@ -13,3 +13,4 @@ class DisciplineListAPIView(APIView):
         disciplines = Discipline.objects.all().prefetch_related('lecturers')
         serializer = DisciplineSerializer(disciplines, many=True)
         return Response(serializer.data)
+    

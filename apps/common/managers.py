@@ -34,3 +34,4 @@ class IsDeletedManager(GetOrNoneManager):
 
     def hard_delete(self):
         return self.unfiltered().delete(hard_delete=True)
+    

@@ -27,3 +27,4 @@ def send_password_reset_email(email, reset_code):
     recipient_list = [email]
     
     send_mail(subject, message, email_from, recipient_list)
+    

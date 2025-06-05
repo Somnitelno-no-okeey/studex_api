@@ -16,41 +16,42 @@ class Discipline(BaseModel):
     format = models.CharField(max_length=11, choices=FORMAT_TYPE_CHOICES, default='TRADITIONAL', verbose_name='Формат проведения')
     
     avg_interest = models.FloatField(
-        default=0,
-        verbose_name="Интересность"
+        default=None,
+        verbose_name="Интересность дисциплины"
     )
     avg_complexity = models.FloatField(
-        default=0,
-        verbose_name="Сложность"
+        default=None,
+        verbose_name="Уровень сложности"
     )
     avg_usefulness = models.FloatField(
-        default=0,
-        verbose_name="Полезность"
+        default=None,
+        verbose_name="Полезность содержания"
     )
     avg_workload = models.FloatField(
-        default=0,
-        verbose_name="Нагрузка"
-    )
-    avg_practical_applicability = models.FloatField(
-        default=0,
-        verbose_name="Практическая применимость"
+        default=None,
+        verbose_name="Объем нагрузки"
     )
     avg_logical_structure = models.FloatField(
-        default=0,
-        verbose_name="Логическая структура"
+        default=None,
+        verbose_name="Логичность структуры"
+    )
+    avg_practical_applicability = models.FloatField(
+        default=None,
+        verbose_name="Практическая применимость"
     )
     avg_teaching_effectiveness = models.FloatField(
-        default=0,
+        default=None,
         verbose_name="Эффективность преподавания"
     )
     avg_materials_availability = models.FloatField(
-        default=0,
-        verbose_name="Доступность материалов"
+        default=None,
+        verbose_name="Доступность учебных материалов"
     )
     avg_feedback_support = models.FloatField(
-        default=0,
+        default=None,
         verbose_name="Обратная связь и поддержка"
     )
+
 
 
     class Meta:

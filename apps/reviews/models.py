@@ -27,49 +27,40 @@ class Review(IsDeletedModel):
     is_anonymous = models.BooleanField(default=False, verbose_name='Анонимность')
     ai_evaluation = models.IntegerField(verbose_name='Оценка отзыва нейросетью')
 
-    interest = models.IntegerField(
-        choices=RATING_CHOICES,
-        default=0,
-        verbose_name="Интересность"
+    avg_interest = models.FloatField(
+        default=None,
+        verbose_name="Интересность дисциплины"
     )
-    complexity = models.IntegerField(
-        choices=RATING_CHOICES,
-        default=0,
-        verbose_name="Сложность"
+    avg_complexity = models.FloatField(
+        default=None,
+        verbose_name="Уровень сложности"
     )
-    usefulness = models.IntegerField(
-        choices=RATING_CHOICES,
-        default=0,
-        verbose_name="Полезность"
+    avg_usefulness = models.FloatField(
+        default=None,
+        verbose_name="Полезность содержания"
     )
-    workload = models.IntegerField(
-        choices=RATING_CHOICES,
-        default=0,
-        verbose_name="Нагрузка"
+    avg_workload = models.FloatField(
+        default=None,
+        verbose_name="Объем нагрузки"
     )
-    practical_applicability = models.IntegerField(
-        choices=RATING_CHOICES,
-        default=0,
+    avg_logical_structure = models.FloatField(
+        default=None,
+        verbose_name="Логичность структуры"
+    )
+    avg_practical_applicability = models.FloatField(
+        default=None,
         verbose_name="Практическая применимость"
     )
-    logical_structure = models.IntegerField(
-        choices=RATING_CHOICES,
-        default=0,
-        verbose_name="Логическая структура"
-    )
-    teaching_effectiveness = models.IntegerField(
-        choices=RATING_CHOICES,
-        default=0,
+    avg_teaching_effectiveness = models.FloatField(
+        default=None,
         verbose_name="Эффективность преподавания"
     )
-    materials_availability = models.IntegerField(
-        choices=RATING_CHOICES,
-        default=0,
-        verbose_name="Доступность материалов"
+    avg_materials_availability = models.FloatField(
+        default=None,
+        verbose_name="Доступность учебных материалов"
     )
-    feedback_support = models.IntegerField(
-        choices=RATING_CHOICES,
-        default=0,
+    avg_feedback_support = models.FloatField(
+        default=None,
         verbose_name="Обратная связь и поддержка"
     )
 

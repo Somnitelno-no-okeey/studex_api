@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.disciplines.models import Discipline, Lecturer
+from .models import Discipline, Lecturer
 
 class LecturerSerializer(serializers.ModelSerializer):
     class Meta:

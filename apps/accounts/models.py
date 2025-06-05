@@ -8,7 +8,7 @@ class User(AbstractBaseUser, IsDeletedModel):
     first_name = models.CharField(verbose_name="Имя", max_length=150, null=True)
     last_name = models.CharField(verbose_name="Фамилия", max_length=150, null=True)
     patronymic = models.CharField(verbose_name="Отчество", max_length=150, null=True)
-    email = models.EmailField(verbose_name="Email адрес", unique=True)
+    email = models.EmailField(verbose_name="Email адрес", blank=True, unique=True)
     is_staff = models.BooleanField(default=False)
     is_verificated = models.BooleanField(default=False)
     verification_code = models.CharField(max_length=6, blank=True, null=True)
@@ -25,3 +25,4 @@ class User(AbstractBaseUser, IsDeletedModel):
     
     def can_send_new_password_reset_code(self):
         return can_send_new_code(self.password_reset_code_sent_at)
+    

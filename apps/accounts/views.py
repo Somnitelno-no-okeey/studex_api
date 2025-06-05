@@ -233,3 +233,4 @@ class PasswordResetConfirmAPIView(APIView):
         
         serializer.save()
         return Response({'message': 'Password has been reset successfully'}, status=200)
+    

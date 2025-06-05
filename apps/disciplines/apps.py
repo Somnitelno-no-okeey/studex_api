@@ -7,3 +7,4 @@ class DisciplinesConfig(AppConfig):
 
     def ready(self):
         import apps.disciplines.signals
+        

@@ -1,15 +1,16 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from apps.accounts.managers import CustomUserManager
 from apps.common.models import IsDeletedModel
 from apps.accounts.utils import can_send_new_code
 
-class User(AbstractBaseUser, IsDeletedModel):
+class User(AbstractBaseUser, PermissionsMixin, IsDeletedModel):
     first_name = models.CharField(verbose_name="Имя", max_length=150, null=True)
     last_name = models.CharField(verbose_name="Фамилия", max_length=150, null=True)
     patronymic = models.CharField(verbose_name="Отчество", max_length=150, null=True)
     email = models.EmailField(verbose_name="Email адрес", blank=True, unique=True)
     is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     is_verificated = models.BooleanField(default=False)
     verification_code = models.CharField(max_length=6, blank=True, null=True)
     verification_code_sent_at = models.DateTimeField(null=True, blank=True)

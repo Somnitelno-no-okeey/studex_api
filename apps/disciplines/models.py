@@ -13,10 +13,36 @@ class ControlType(models.TextChoices):
     EXAM = 'EXAM', 'Экзамен'
     CREDIT = 'CREDIT', 'Зачет'
 
+class Lecturer(BaseModel):
+    first_name = models.CharField(max_length=150, verbose_name='Имя')
+    last_name = models.CharField(max_length=150, verbose_name='Фамилия')
+    patronymic = models.CharField(max_length=150, verbose_name='Отчество')
+
+    class Meta:
+        verbose_name = "Преподаватель"
+        verbose_name_plural = "Преподаватели"
+
+    def __str__(self):
+        return f"{self.last_name} {self.first_name} {self.patronymic}"
+    
+class Module(BaseModel):
+    name = models.CharField(max_length=100, verbose_name='Название модуля')
+
+    class Meta:
+        verbose_name = "Модуль"
+        verbose_name_plural = "Модули"
+
+    def __str__(self):
+        return self.name
 
 class Discipline(BaseModel):
     name = models.CharField(max_length=255, verbose_name='Название дисциплины')
-    module = models.CharField(max_length=100, verbose_name='Модуль')
+    module = models.ForeignKey(
+        Module,
+        on_delete=models.CASCADE,
+        related_name='disciplines',
+        verbose_name='Модуль'
+    )
     avg_rating = models.FloatField(
         default=None,
         null=True,
@@ -98,15 +124,5 @@ class Discipline(BaseModel):
         return self.name
 
 
-class Lecturer(BaseModel):
-    first_name = models.CharField(max_length=150, verbose_name='Имя')
-    last_name = models.CharField(max_length=150, verbose_name='Фамилия')
-    patronymic = models.CharField(max_length=150, verbose_name='Отчество')
 
-    class Meta:
-        verbose_name = "Преподаватель"
-        verbose_name_plural = "Преподаватели"
-
-    def __str__(self):
-        return f"{self.last_name} {self.first_name} {self.patronymic}"
     

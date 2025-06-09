@@ -8,32 +8,25 @@ class DisciplineFormat(models.TextChoices):
     ONLINE = 'ONLINE', 'Онлайн'
     BLENDED = 'BLENDED', 'Смешанная'
 
-
 class ControlType(models.TextChoices):
     EXAM = 'EXAM', 'Экзамен'
     CREDIT = 'CREDIT', 'Зачет'
 
 
 class Discipline(BaseModel):
-    name = models.CharField(max_length=255, verbose_name='Название дисциплины')
+    name = models.CharField(max_length=255, verbose_name='Название')
     module = models.CharField(max_length=100, verbose_name='Модуль')
-    avg_rating = models.FloatField(
-        default=None,
-        null=True,
-        blank=True,
-        verbose_name='Общая оценка'
-    )
+    avg_rating = models.FloatField(null=True, blank=True, verbose_name='Общая оценка')
+    review_count = models.IntegerField(default=0, verbose_name='Количество отзывов')
     
     format = models.CharField(
         max_length=11,
         choices=DisciplineFormat.choices,
-        blank=True,
         verbose_name='Формат проведения'
     )
     control_type = models.CharField(
         max_length=10,
         choices=ControlType.choices,
-        blank=True,
         verbose_name='Тип контроля'
     )
     
@@ -88,7 +81,7 @@ class Discipline(BaseModel):
         related_name='disciplines',
         verbose_name='Преподаватели'
     )
-    description = models.TextField(verbose_name='Описание дисциплины')
+    description = models.TextField(verbose_name='Описание')
 
     class Meta:
         verbose_name = "Дисциплина"
@@ -97,16 +90,26 @@ class Discipline(BaseModel):
     def __str__(self):
         return self.name
 
-
 class Lecturer(BaseModel):
     first_name = models.CharField(max_length=150, verbose_name='Имя')
     last_name = models.CharField(max_length=150, verbose_name='Фамилия')
-    patronymic = models.CharField(max_length=150, verbose_name='Отчество')
+    patronymic = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name='Отчество'
+    )
 
     class Meta:
         verbose_name = "Преподаватель"
         verbose_name_plural = "Преподаватели"
 
+    def get_full_name(self):
+        parts = [self.last_name, self.first_name]
+        if self.patronymic:
+            parts.append(self.patronymic)
+        return ' '.join(parts)
+
     def __str__(self):
-        return f"{self.last_name} {self.first_name} {self.patronymic}"
+        return self.get_full_name()
     

@@ -1,6 +1,7 @@
 from django.urls import path
-from apps.disciplines.views import DisciplineListAPIView
+from .views import DisciplineListAPIView, DisciplineDetailAPIView
 
 urlpatterns = [
-    path('discipline-list/', DisciplineListAPIView.as_view(), name='discipline-list'),
+    path('', DisciplineListAPIView.as_view(), name='discipline-list'),
+    path('<uuid:id>/', DisciplineDetailAPIView.as_view(), name='discipline-detail'),
 ]

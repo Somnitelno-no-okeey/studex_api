@@ -11,18 +11,6 @@ class DisciplineFormat(models.TextChoices):
 class ControlType(models.TextChoices):
     EXAM = 'EXAM', 'Экзамен'
     CREDIT = 'CREDIT', 'Зачет'
-
-class Lecturer(BaseModel):
-    first_name = models.CharField(max_length=150, verbose_name='Имя')
-    last_name = models.CharField(max_length=150, verbose_name='Фамилия')
-    patronymic = models.CharField(max_length=150, verbose_name='Отчество')
-
-    class Meta:
-        verbose_name = "Преподаватель"
-        verbose_name_plural = "Преподаватели"
-
-    def __str__(self):
-        return f"{self.last_name} {self.first_name} {self.patronymic}"
     
 class Module(BaseModel):
     name = models.CharField(max_length=100, verbose_name='Название модуля')
@@ -133,4 +121,3 @@ class Lecturer(BaseModel):
 
     def __str__(self):
         return self.get_full_name()
-    

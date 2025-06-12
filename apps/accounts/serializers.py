@@ -34,7 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields =("id", "email")
+        fields =("email", "first_name", "last_name", "patronymic", "is_verificated")
 
 
 class LoginUserSerializer(serializers.Serializer):
@@ -127,3 +127,18 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         user.password = make_password(self.validated_data['new_password'])
         user.password_reset_code = None
         user.save()
+
+class UpdateFullNameSerializer(serializers.Serializer):
+    first_name = serializers.CharField(max_length=150)
+    last_name = serializers.CharField(max_length=150)
+    patronymic = serializers.CharField(max_length=150, required=False, allow_blank=True)
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, min_length=8)
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Old password is incorrect.")
+        return value

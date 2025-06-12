@@ -6,10 +6,18 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework.permissions import IsAuthenticated
 from apps.accounts.models import User
-from apps.accounts.serializers import CreateUserSerializer, LoginUserSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer, PasswordResetVerifySerializer, ResendVerificationCodeSerializer, VerifyAccountSerializer, UserSerializer
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
-from drf_spectacular.types import OpenApiTypes
+from apps.accounts.serializers import CreateUserSerializer, LoginUserSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer, PasswordResetVerifySerializer, ResendVerificationCodeSerializer, VerifyAccountSerializer, UserSerializer, UpdateFullNameSerializer, ChangePasswordSerializer
+from drf_spectacular.utils import extend_schema, OpenApiExample
 from apps.accounts.utils import generate_verification_code, send_password_reset_email, send_verification_email
+from rest_framework import status
+
+class UserProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=200)
 
 class RegisterAPIView(APIView):
     serializer_class = CreateUserSerializer
@@ -41,23 +49,24 @@ class LoginAPIView(APIView):
             user = serializer.validated_data
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
+            refresh_token = str(refresh)
 
             response = Response({
-                "user": UserSerializer(user).data},
-                                status=200)
+                "user": UserSerializer(user).data,
+                "access": access_token
+            }, status=200)
             
-            response.set_cookie(key="access_token", 
-                                value=access_token,
-                                httponly=True,
-                                secure=True,
-                                samesite="Lax")
-            
-            response.set_cookie(key="refresh_token",
-                                value=str(refresh),
-                                httponly=True,
-                                secure=True,
-                                samesite="Lax")
+            response.set_cookie(
+                key="refresh_token",
+                value=refresh_token,
+                httponly=True,
+                secure=True,
+                samesite="Lax",
+                max_age=30 * 24 * 60 * 60
+            )
+
             return response
+
         return Response(serializer.errors, status=400)
 
 
@@ -233,4 +242,32 @@ class PasswordResetConfirmAPIView(APIView):
         
         serializer.save()
         return Response({'message': 'Password has been reset successfully'}, status=200)
+    
+
+class UpdateFullNameAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateFullNameSerializer
+
+    def put(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            user = request.user
+            user.first_name = serializer.validated_data['first_name']
+            user.last_name = serializer.validated_data['last_name']
+            user.patronymic = serializer.validated_data.get('patronymic', '')
+            user.save()
+            return Response({'message': 'Full name updated successfully'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ChangePasswordAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            user = request.user
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            return Response({'message': 'Password changed successfully'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     

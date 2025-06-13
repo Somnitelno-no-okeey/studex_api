@@ -1,83 +1,54 @@
 from rest_framework import serializers
-from apps.reviews.models import Review
+from .models import Review
+from apps.disciplines.models import Discipline
 
-class CriterionSerializer(serializers.Serializer):
-    criterion = serializers.CharField()
-    rating = serializers.FloatField()
+
+BAD_WORDS = ["badword1", "badword2", "плохое_слово"]  # потом нужно будет добавить их
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        exclude = ('user',)
+
+    def validate(self, data):
+        discipline = self.context['discipline']
+
+        # Проверка обязательных полей
+        if not (1 <= data.get('interest', 0) <= 5):
+            raise serializers.ValidationError({"interest": "Оценка обязательна от 1 до 5."})
+        if not (1 <= data.get('complexity', 0) <= 5):
+            raise serializers.ValidationError({"complexity": "Оценка обязательна от 1 до 5."})
+
+        active_fields = {
+            'usefulness': discipline.is_usefulness_active,
+            'workload': discipline.is_workload_active,
+            'logical_structure': discipline.is_logical_structure_active,
+            'practical_applicability': discipline.is_practical_applicability_active,
+            'teaching_effectiveness': discipline.is_teaching_effectiveness_active,
+            'materials_availability': discipline.is_materials_availability_active,
+            'feedback_support': discipline.is_feedback_support_active,
+        }
+        for field, is_active in active_fields.items():
+            if is_active and not (1 <= data.get(field, 0) <= 5):
+                raise serializers.ValidationError({field: "Обязательное поле: оценка от 1 до 5."})
+
+        comment = data.get('comment', '').lower()
+        if any(bad_word in comment for bad_word in BAD_WORDS):
+            raise serializers.ValidationError({"comment": "Комментарий содержит недопустимые слова."})
+
+        return data
 
 class ReviewListSerializer(serializers.ModelSerializer):
-    is_user_review = serializers.SerializerMethodField()
-    student_name = serializers.SerializerMethodField()
-    published_at = serializers.DateField(source='created_at', format='%Y-%m-%d')
-    average_rating = serializers.SerializerMethodField()
-    criteria = serializers.SerializerMethodField()
-    text = serializers.CharField(source='review_text')
+    user = serializers.SerializerMethodField()
 
     class Meta:
         model = Review
         fields = [
-            'id',
-            'is_user_review',
-            'student_name',
-            'published_at',
-            'average_rating',
-            'criteria',
-            'text',
+            'id', 'user', 'interest', 'complexity', 'usefulness', 'workload',
+            'logical_structure', 'practical_applicability',
+            'teaching_effectiveness', 'materials_availability', 'feedback_support',
+            'comment', 'anonymous', 'created_at'
         ]
 
-    def get_is_user_review(self, obj):
-        user = self.context['request'].user
-        return obj.user == user
-
-    def get_student_name(self, obj):
-        if obj.is_anonymous:
-            return "Аноним"
-        return f"{obj.user.first_name} {obj.user.last_name}".strip()
-
-    def get_average_rating(self, obj):
-        ratings = self._get_ratings_list(obj)
-        valid_ratings = [r for r in ratings if r is not None]
-        if not valid_ratings:
-            return None
-        return round(sum(valid_ratings) / len(valid_ratings), 1)
-
-    def get_criteria(self, obj):
-        mapping = {
-            'avg_interest': "Интересность дисциплины",
-            'avg_complexity': "Уровень сложности",
-            'avg_usefulness': "Полезность содержания",
-            'avg_workload': "Объем нагрузки",
-            'avg_logical_structure': "Логичность структуры",
-            'avg_practical_applicability': "Практическая применимость",
-            'avg_teaching_effectiveness': "Эффективность преподавания",
-            'avg_materials_availability': "Доступность учебных материалов",
-            'avg_feedback_support': "Обратная связь и поддержка",
-        }
-
-        criteria = []
-        for field, label in mapping.items():
-            rating = getattr(obj, field)
-            if rating is not None:
-                criteria.append({
-                    "criterion": label,
-                    "rating": round(rating, 1)
-                })
-        return criteria
-
-    def _get_ratings_list(self, obj):
-        return [
-            obj.avg_interest,
-            obj.avg_complexity,
-            obj.avg_usefulness,
-            obj.avg_workload,
-            obj.avg_logical_structure,
-            obj.avg_practical_applicability,
-            obj.avg_teaching_effectiveness,
-            obj.avg_materials_availability,
-            obj.avg_feedback_support
-        ]
-
-    def get_fields(self):
-        fields = super().get_fields()
-        fields['criteria'] = serializers.ListSerializer(child=CriterionSerializer())
-        return fields
+    def get_user(self, obj):
+        return "Аноним" if obj.anonymous else obj.user.username

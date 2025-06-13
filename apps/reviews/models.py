@@ -1,67 +1,30 @@
 from django.db import models
 from apps.accounts.models import User
-from apps.common.models import IsDeletedModel
+from django.contrib.auth import get_user_model
 from apps.disciplines.models import Discipline
 
 
-RATING_CHOICES = [(i, str(i)) for i in range(6)]
+User = get_user_model()
 
-
-class Review(IsDeletedModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+class Review(models.Model):
     discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE, related_name='reviews')
-    review_text = models.TextField(verbose_name='Текст отзыва')
-    is_anonymous = models.BooleanField(default=False, verbose_name='Анонимность')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    avg_interest = models.FloatField(
-        null=True, 
-        default=None, 
-        verbose_name="Интересность дисциплины"
-    )
-    avg_complexity = models.FloatField(
-        null=True, 
-        default=None,
-        verbose_name="Уровень сложности"
-    )
-    avg_usefulness = models.FloatField(
-        null=True, 
-        default=None, 
-        verbose_name="Полезность содержания"
-    )
-    avg_workload = models.FloatField(
-        null=True, 
-        default=None, 
-        verbose_name="Объем нагрузки"
-    )
-    avg_logical_structure = models.FloatField(
-        null=True, 
-        default=None, 
-        verbose_name="Логичность структуры"
-    )
-    avg_practical_applicability = models.FloatField(
-        null=True, 
-        default=None, 
-        verbose_name="Практическая применимость"
-    )
-    avg_teaching_effectiveness = models.FloatField(
-        null=True, 
-        default=None, 
-        verbose_name="Эффективность преподавания"
-    )
-    avg_materials_availability = models.FloatField(
-        null=True, 
-        default=None, 
-        verbose_name="Доступность учебных материалов"
-    )
-    avg_feedback_support = models.FloatField(
-        null=True, 
-        default=None, 
-        verbose_name="Обратная связь и поддержка"
-    )
+    interest = models.PositiveSmallIntegerField(default=0)
+    complexity = models.PositiveSmallIntegerField(default=0)
 
-    class Meta:
-        verbose_name = "Отзыв"
-        verbose_name_plural = "Отзывы"
+    usefulness = models.PositiveSmallIntegerField(default=0)
+    workload = models.PositiveSmallIntegerField(default=0)
+    logical_structure = models.PositiveSmallIntegerField(default=0)
+    practical_applicability = models.PositiveSmallIntegerField(default=0)
+    teaching_effectiveness = models.PositiveSmallIntegerField(default=0)
+    materials_availability = models.PositiveSmallIntegerField(default=0)
+    feedback_support = models.PositiveSmallIntegerField(default=0)
+
+    comment = models.TextField(blank=True)
+    anonymous = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Отзыв от {self.user} для {self.discipline}"
+        return f"Review by {self.user} on {self.discipline}"

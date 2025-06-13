@@ -1,25 +1,31 @@
-# from django.db.models.signals import post_save, post_delete
-# from django.dispatch import receiver
-# from apps.reviews.models import Review
+from django.dispatch import receiver
+from django.db.models.signals import pre_save
 
-# @receiver([post_save, post_delete], sender=Review)
-# def update_review_avg_rating(sender, instance, **kwargs):
-#     rating_fields = [
-#         'avg_interest',
-#         'avg_complexity',
-#         'avg_usefulness',
-#         'avg_workload',
-#         'avg_practical_applicability',
-#         'avg_logical_structure',
-#         'avg_teaching_effectiveness',
-#         'avg_materials_availability',
-#         'avg_feedback_support'
-#     ]
-    
-#     values = [
-#         getattr(instance, field)
-#         for field in rating_fields
-#         if getattr(instance, field) is not None
-#     ]
-#     instance.avg_rating = sum(values) / len(values) if values else None
-#     instance.save(update_fields=['avg_rating'])
+from .models import Review
+
+@receiver(pre_save, sender=Review)
+def calculate_average_on_pre_save(sender, instance, **kwargs):
+    scores = []
+    if instance.is_interest_active:
+        scores.append(instance.interest)
+    if instance.is_complexity_active:
+        scores.append(instance.complexity)
+    if instance.is_usefulness_active:
+        scores.append(instance.usefulness)
+    if instance.is_workload_active:
+        scores.append(instance.workload)
+    if instance.is_logical_structure_active:
+        scores.append(instance.logical_structure)
+    if instance.is_practical_applicability_active:
+        scores.append(instance.practical_applicability)
+    if instance.is_teaching_effectiveness_active:
+        scores.append(instance.teaching_effectiveness)
+    if instance.is_materials_availability_active:
+        scores.append(instance.materials_availability)
+    if instance.is_feedback_support_active:
+        scores.append(instance.feedback_support)
+
+    if scores:
+        instance.average = sum(scores) / len(scores)
+    else:
+        instance.average = 0

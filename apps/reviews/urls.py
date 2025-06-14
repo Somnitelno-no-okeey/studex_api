@@ -21,5 +21,5 @@ urlpatterns = [
     path('<uuid:pk>/update/', ReviewUpdateView.as_view(), name='update-review'),
 
     # DELETE — удаление
-    path('<uuid:pk>/delete/', ReviewDeleteView.as_view(), name='delete-review'),
+    path('<uuid:pk>/', ReviewDeleteView.as_view(), name='delete-review'),
 ]

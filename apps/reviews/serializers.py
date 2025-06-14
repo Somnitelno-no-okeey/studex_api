@@ -68,33 +68,36 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class ReviewListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
-    criteria = CriteriaSerializer(many=True, read_only=True)
+    criteria = serializers.SerializerMethodField()
 
     class Meta:
         model = Review
         fields = ['id', 'user', 'criteria', 'comment', 'anonymous', 'created_at']
 
     def get_user(self, obj):
-        return "Аноним" if obj.anonymous else obj.user.username
+        return "Аноним" if obj.anonymous else obj.user.get_full_name()
+
+    def get_criterion(self, obj, field_name, flag_name=None):
+        label = Review._meta.get_field(field_name).verbose_name
+        value = getattr(obj, field_name)
+        discipline = obj.discipline
+        if flag_name:
+            is_active = getattr(discipline, flag_name)
+            if not is_active:
+                return None
+        return {"criterion": label, "rating": value}
 
     def get_criteria(self, obj):
-        discipline = obj.discipline
-        criteria = []
-
-        fields = [
-            ('interest', getattr(discipline, 'is_interest_active', True)),
-            ('complexity', getattr(discipline, 'is_complexity_active', True)),
-            ('usefulness', getattr(discipline, 'is_usefulness_active', True)),
-            ('workload', getattr(discipline, 'is_workload_active', True)),
-            ('logical_structure', getattr(discipline, 'is_logical_structure_active', True)),
-            ('practical_applicability', getattr(discipline, 'is_practical_applicability_active', True)),
-            ('teaching_effectiveness', getattr(discipline, 'is_teaching_effectiveness_active', True)),
-            ('materials_availability', getattr(discipline, 'is_materials_availability_active', True)),
-            ('feedback_support', getattr(discipline, 'is_feedback_support_active', True)),
+        criteria = [
+            self.get_criterion(obj, 'interest'),
+            self.get_criterion(obj, 'complexity'),
+            self.get_criterion(obj, 'usefulness', 'is_usefulness_active'),
+            self.get_criterion(obj, 'workload', 'is_workload_active'),
+            self.get_criterion(obj, 'logical_structure', 'is_logical_structure_active'),
+            self.get_criterion(obj, 'practical_applicability', 'is_practical_applicability_active'),
+            self.get_criterion(obj, 'teaching_effectiveness', 'is_teaching_effectiveness_active'),
+            self.get_criterion(obj, 'materials_availability', 'is_materials_availability_active'),
+            self.get_criterion(obj, 'feedback_support', 'is_feedback_support_active'),
         ]
 
-        for field_name, is_active in fields:
-            if is_active:
-                criteria.append({"criterion": field_name, "rating": getattr(obj, field_name)})
-
-        return criteria
+        return [item for item in criteria if item is not None]

@@ -27,3 +27,8 @@ class User(AbstractBaseUser, PermissionsMixin, IsDeletedModel):
     def can_send_new_password_reset_code(self):
         return can_send_new_code(self.password_reset_code_sent_at)
     
+    def get_full_name(self):
+        return " ".join(filter(None, [self.last_name, self.first_name, self.patronymic]))
+
+    def __str__(self):
+        return self.get_full_name() or self.email

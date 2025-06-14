@@ -12,22 +12,22 @@ class Review(BaseModel):
                                    verbose_name='Дисциплина')
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор')
 
-    interest = models.PositiveSmallIntegerField(default=0, verbose_name='Интерес')
+    interest = models.PositiveSmallIntegerField(default=0, verbose_name='Интересность дисциплины')
     is_interest_active = models.BooleanField(default=False, verbose_name='Учитывать интерес')
 
-    complexity = models.PositiveSmallIntegerField(default=0, verbose_name='Сложность')
+    complexity = models.PositiveSmallIntegerField(default=0, verbose_name='Уровень сложности')
     is_complexity_active = models.BooleanField(default=False, verbose_name='Учитывать сложность')
 
-    usefulness = models.PositiveSmallIntegerField(default=0, verbose_name='Полезность')
+    usefulness = models.PositiveSmallIntegerField(default=0, verbose_name='Полезность содержания')
     is_usefulness_active = models.BooleanField(default=False, verbose_name='Учитывать полезность')
 
-    workload = models.PositiveSmallIntegerField(default=0, verbose_name='Нагрузка')
+    workload = models.PositiveSmallIntegerField(default=0, verbose_name='Объем нагрузки')
     is_workload_active = models.BooleanField(default=False, verbose_name='Учитывать нагрузку')
 
     logical_structure = models.PositiveSmallIntegerField(default=0, verbose_name='Логичность структуры')
     is_logical_structure_active = models.BooleanField(default=False, verbose_name='Учитывать логичность структуры')
 
-    practical_applicability = models.PositiveSmallIntegerField(default=0, verbose_name='Практическое применение')
+    practical_applicability = models.PositiveSmallIntegerField(default=0, verbose_name='Практическая применимость')
     is_practical_applicability_active = models.BooleanField(default=False, verbose_name='Учитывать практическое применение')
 
     teaching_effectiveness = models.PositiveSmallIntegerField(default=0, verbose_name='Эффективность преподавания')

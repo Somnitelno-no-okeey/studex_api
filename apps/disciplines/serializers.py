@@ -92,11 +92,12 @@ class DisciplineDetailSerializer(serializers.ModelSerializer):
         label = obj._meta.get_field(field_name).verbose_name
         if flag_name:
             active = getattr(obj, flag_name)
-            return {"label": label, "value": value if active else None}
-        return {"label": label, "value": value}
+            if not active:
+                return None
+        return {"criterion": label, "rating": value}
 
     def get_criteria(self, obj):
-        return [
+        criteria = [
             self.get_criterion(obj, 'avg_interest'),
             self.get_criterion(obj, 'avg_complexity'),
             self.get_criterion(obj, 'avg_usefulness', 'is_usefulness_active'),
@@ -107,3 +108,5 @@ class DisciplineDetailSerializer(serializers.ModelSerializer):
             self.get_criterion(obj, 'avg_materials_availability', 'is_materials_availability_active'),
             self.get_criterion(obj, 'avg_feedback_support', 'is_feedback_support_active'),
         ]
+
+        return [item for item in criteria if item is not None]

@@ -1,4 +1,5 @@
 from django.db import models
+from apps.common.models import BaseModel
 from apps.accounts.models import User
 from django.contrib.auth import get_user_model
 from apps.disciplines.models import Discipline
@@ -6,25 +7,46 @@ from apps.disciplines.models import Discipline
 
 User = get_user_model()
 
-class Review(models.Model):
-    discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE, related_name='reviews')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+class Review(BaseModel):
+    discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE, related_name='reviews',
+                                   verbose_name='Дисциплина')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор')
 
-    interest = models.PositiveSmallIntegerField(default=0)
-    complexity = models.PositiveSmallIntegerField(default=0)
+    interest = models.PositiveSmallIntegerField(default=0, verbose_name='Интерес')
+    is_interest_active = models.BooleanField(default=False, verbose_name='Учитывать интерес')
 
-    usefulness = models.PositiveSmallIntegerField(default=0)
-    workload = models.PositiveSmallIntegerField(default=0)
-    logical_structure = models.PositiveSmallIntegerField(default=0)
-    practical_applicability = models.PositiveSmallIntegerField(default=0)
-    teaching_effectiveness = models.PositiveSmallIntegerField(default=0)
-    materials_availability = models.PositiveSmallIntegerField(default=0)
-    feedback_support = models.PositiveSmallIntegerField(default=0)
+    complexity = models.PositiveSmallIntegerField(default=0, verbose_name='Сложность')
+    is_complexity_active = models.BooleanField(default=False, verbose_name='Учитывать сложность')
 
-    comment = models.TextField(blank=True)
-    anonymous = models.BooleanField(default=False)
+    usefulness = models.PositiveSmallIntegerField(default=0, verbose_name='Полезность')
+    is_usefulness_active = models.BooleanField(default=False, verbose_name='Учитывать полезность')
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    workload = models.PositiveSmallIntegerField(default=0, verbose_name='Нагрузка')
+    is_workload_active = models.BooleanField(default=False, verbose_name='Учитывать нагрузку')
+
+    logical_structure = models.PositiveSmallIntegerField(default=0, verbose_name='Логичность структуры')
+    is_logical_structure_active = models.BooleanField(default=False, verbose_name='Учитывать логичность структуры')
+
+    practical_applicability = models.PositiveSmallIntegerField(default=0, verbose_name='Практическое применение')
+    is_practical_applicability_active = models.BooleanField(default=False, verbose_name='Учитывать практическое применение')
+
+    teaching_effectiveness = models.PositiveSmallIntegerField(default=0, verbose_name='Эффективность преподавания')
+    is_teaching_effectiveness_active = models.BooleanField(default=False, verbose_name='Учитывать эффективность преподавания')
+
+    materials_availability = models.PositiveSmallIntegerField(default=0, verbose_name='Доступность учебных материалов')
+    is_materials_availability_active = models.BooleanField(default=False, verbose_name='Учитывать доступность учебных материалов')
+
+    feedback_support = models.PositiveSmallIntegerField(default=0, verbose_name='Обратная связь и поддержка')
+    is_feedback_support_active = models.BooleanField(default=False, verbose_name='Учитывать обратную связь и поддержку')
+
+    comment = models.TextField(blank=True, verbose_name='Комментарий')
+    anonymous = models.BooleanField(default=False, verbose_name='Анонимно')
+
+    average = models.FloatField(default=None, null=True, verbose_name='Общая оценка')
+
+    class Meta:
+        verbose_name = "Отзыв"
+        verbose_name_plural = "Отзывы"
 
     def __str__(self):
-        return f"Review by {self.user} on {self.discipline}"
+        return f"Отзыв {self.pk} пользователя {self.user} на {self.discipline}" 

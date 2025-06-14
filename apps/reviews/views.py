@@ -4,12 +4,16 @@ from .serializers import ReviewSerializer, ReviewListSerializer
 from apps.disciplines.models import Discipline
 
 
-class ReviewCreateView(generics.CreateAPIView):
-    serializer_class = ReviewSerializer
-    permission_classes = [permissions.IsAuthenticated]
+class ReviewCreateListView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return ReviewSerializer
+        return ReviewListSerializer
 
     def get_queryset(self):
-        return Review.objects.filter(user=self.request.user)
+        return Review.objects.filter(discipline_id=self.kwargs['discipline_id'])
 
     def perform_create(self, serializer):
         discipline = Discipline.objects.get(pk=self.kwargs['discipline_id'])
@@ -20,21 +24,13 @@ class ReviewCreateView(generics.CreateAPIView):
         context['discipline'] = Discipline.objects.get(pk=self.kwargs['discipline_id'])
         return context
 
-
-class ReviewListView(generics.ListAPIView):
-    serializer_class = ReviewListSerializer
-
-    def get_queryset(self):
-        return Review.objects.filter(discipline_id=self.kwargs['discipline_id'])
-
-
 class ReviewDetailView(generics.RetrieveAPIView):
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'pk'
 
     def get_queryset(self):
-        return Review.objects.filter(user=self.request.user)
+        return Review.objects.filter(user=self.request.user, discipline_id=self.kwargs['discipline_id'])
 
 
 class ReviewUpdateView(generics.UpdateAPIView):
@@ -43,7 +39,7 @@ class ReviewUpdateView(generics.UpdateAPIView):
     lookup_field = 'pk'
 
     def get_queryset(self):
-        return Review.objects.filter(user=self.request.user)
+        return Review.objects.filter(user=self.request.user, discipline_id=self.kwargs['discipline_id'])
     
     def get_object(self):
         obj = super().get_object()
@@ -57,7 +53,7 @@ class ReviewDeleteView(generics.DestroyAPIView):
     lookup_field = 'pk'
 
     def get_queryset(self):
-        return Review.objects.filter(user=self.request.user)
+        return Review.objects.filter(user=self.request.user, discipline_id=self.kwargs['discipline_id'])
 
     def get_object(self):
         obj = super().get_object()

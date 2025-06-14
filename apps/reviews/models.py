@@ -42,7 +42,7 @@ class Review(BaseModel):
     comment = models.TextField(blank=True, verbose_name='Комментарий')
     anonymous = models.BooleanField(default=False, verbose_name='Анонимно')
 
-    average = models.FloatField(default=None, null=True, verbose_name='Общая оценка')
+    avg_rating = models.FloatField(default=None, null=True, verbose_name='Общая оценка')
 
     class Meta:
         verbose_name = "Отзыв"

@@ -4,11 +4,11 @@ from .models import Review
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('user', 'discipline', 'average', 'anonymous')
+    list_display = ('user', 'discipline', 'avg_rating', 'anonymous')
     list_filter = ('discipline', 'anonymous')
     search_fields = ('user__username', 'discipline__name')
 
-    readonly_fields = ('average',)
+    readonly_fields = ('avg_rating',)
 
     fieldsets = (
         ('Основная информация', {
@@ -28,7 +28,7 @@ class ReviewAdmin(admin.ModelAdmin):
             )
         }),
         ('Результат', {
-            'fields': ('average',),
+            'fields': ('avg_rating',),
             'description': 'Это поле рассчитывается автоматически из активных критериев'
         })
     )

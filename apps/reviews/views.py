@@ -40,6 +40,7 @@ class ReviewUpdateView(generics.UpdateAPIView):
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'pk'
+    http_method_names = ['put', 'options']
     
     def get_queryset(self):
         return Review.objects.filter(user=self.request.user, discipline_id=self.kwargs['discipline_id'])

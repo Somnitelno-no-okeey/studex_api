@@ -24,31 +24,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ['criteria', 'comment', 'anonymous']
-
-    def get_criteria(self, obj):
-        discipline = obj.discipline
-        criteria = []
-
-        fields = [
-            ('interest', True),
-            ('complexity', True),
-            ('usefulness', discipline.is_usefulness_active),
-            ('workload', discipline.is_workload_active),
-            ('logical_structure', discipline.is_logical_structure_active),
-            ('practical_applicability', discipline.is_practical_applicability_active),
-            ('teaching_effectiveness', discipline.is_teaching_effectiveness_active),
-            ('materials_availability', discipline.is_materials_availability_active),
-            ('feedback_support', discipline.is_feedback_support_active),
-        ]
-
-        for field_name, is_active in fields:
-            if is_active:
-                criteria.append({
-                    "criterion": CRITERIA_MAPPING[field_name],
-                    "rating": getattr(obj, field_name)
-                })
-
-        return criteria
+        read_only_fields = ['average', 'user', 'discipline']
 
     def validate(self, data):
         discipline = self.context['discipline']
@@ -95,7 +71,15 @@ class ReviewSerializer(serializers.ModelSerializer):
         
         for field, rating in criteria_dict.items():
             data[field] = rating
+            data[f'is_{field}_active'] = True
         
+        for field in active_fields:
+            if field not in criteria_dict:
+                data[f'is_{field}_active'] = False
+        
+        data['is_interest_active'] = True
+        data['is_complexity_active'] = True
+
         comment = data.get('comment', '') or ''
         if any(bad_word in comment.lower() for bad_word in BAD_WORDS):
             raise serializers.ValidationError({"comment": "Комментарий содержит недопустимые выражения."})
@@ -106,10 +90,12 @@ class ReviewSerializer(serializers.ModelSerializer):
 class ReviewListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     criteria = serializers.SerializerMethodField()
+    avg_rating = serializers.FloatField(read_only=True)
+    created_at = serializers.DateTimeField(format="%d.%m.%Y", read_only=True)
 
     class Meta:
         model = Review
-        fields = ['id', 'user', 'criteria', 'comment', 'anonymous', 'created_at']
+        fields = ['id', 'user', 'criteria', 'comment', 'created_at', 'avg_rating']
 
     def get_user(self, obj):
         return "Аноним" if obj.anonymous else obj.user.get_full_name()

@@ -1,5 +1,7 @@
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from .models import Review
 from .serializers import ReviewSerializer, ReviewListSerializer
 from apps.disciplines.models import Discipline
@@ -70,3 +72,15 @@ class ReviewDeleteView(generics.DestroyAPIView):
         if obj.user != self.request.user and not self.request.user.is_staff:
             raise PermissionDenied("Вы не можете удалить чужой отзыв.")
         return obj
+
+
+class UserReviewView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, discipline_id):
+        try:
+            review = Review.objects.filter(user=request.user, discipline_id=discipline_id).first()
+            return Response({"review_id": review.pk if review else None})
+        except Review.DoesNotExist:
+            return Response({"review_id": None})
+        

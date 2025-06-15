@@ -1,6 +1,5 @@
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
-
 from .models import Review
 
 @receiver(pre_save, sender=Review)
@@ -24,8 +23,8 @@ def calculate_average_on_pre_save(sender, instance, **kwargs):
         scores.append(instance.materials_availability)
     if instance.is_feedback_support_active:
         scores.append(instance.feedback_support)
-
+    
     if scores:
-        instance.average = sum(scores) / len(scores)
+        instance.avg_rating = sum(scores) / len(scores) 
     else:
-        instance.average = 0
+        instance.avg_rating = 0

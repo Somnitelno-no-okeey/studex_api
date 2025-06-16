@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Discipline, Lecturer
+from .models import Discipline, Lecturer, Module
 
 
 class LecturerSerializer(serializers.ModelSerializer):
@@ -110,3 +110,8 @@ class DisciplineDetailSerializer(serializers.ModelSerializer):
         ]
 
         return [item for item in criteria if item is not None]
+
+class ModuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Module
+        fields = ['id', 'name']

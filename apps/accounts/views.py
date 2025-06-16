@@ -228,8 +228,7 @@ class PasswordResetConfirmAPIView(APIView):
                 'Example request',
                 value={
                     'email': 'user@example.com',
-                    'password_reset_code': '123456',
-                    'new_password': 'newpassword'
+                    'password_reset_code': '123456'
                 },
                 request_only=True
             )

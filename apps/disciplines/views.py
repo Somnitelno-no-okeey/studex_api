@@ -7,6 +7,8 @@ from apps.disciplines.serializers import (
     DisciplineDetailSerializer,
     DisciplineCreateUpdateSerializer,
 )
+from apps.disciplines.models import Module
+from apps.disciplines.serializers import ModuleSerializer
 
 
 @extend_schema(tags=['Disciplines'])
@@ -26,3 +28,9 @@ class DisciplineDetailAPIView(generics.RetrieveAPIView):
 class DisciplineCreateAPIView(generics.CreateAPIView):
     queryset = Discipline.objects.all()
     serializer_class = DisciplineCreateUpdateSerializer
+
+@extend_schema(tags=['Modules'])
+class ModuleListAPIView(generics.ListAPIView):
+    queryset = Module.objects.all()
+    serializer_class = ModuleSerializer
+    pagination_class = None

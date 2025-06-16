@@ -5,8 +5,8 @@ from apps.common.models import IsDeletedModel
 from apps.accounts.utils import can_send_new_code
 
 class User(AbstractBaseUser, PermissionsMixin, IsDeletedModel):
-    first_name = models.CharField(verbose_name="Имя", max_length=150, null=True)
-    last_name = models.CharField(verbose_name="Фамилия", max_length=150, null=True)
+    first_name = models.CharField(verbose_name="Имя", max_length=150, default="Пользователь")
+    last_name = models.CharField(verbose_name="Фамилия", max_length=150, default="Неизвестный")
     patronymic = models.CharField(verbose_name="Отчество", max_length=150, null=True)
     email = models.EmailField(verbose_name="Email адрес", blank=True, unique=True)
     is_staff = models.BooleanField(default=False)

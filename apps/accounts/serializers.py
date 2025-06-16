@@ -106,7 +106,6 @@ class PasswordResetVerifySerializer(serializers.Serializer):
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
-    password_reset_code = serializers.CharField(required=True, max_length=6)
     new_password = serializers.CharField(required=True, min_length=8)
 
     def validate(self, data):

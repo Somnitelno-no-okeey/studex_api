@@ -115,8 +115,6 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         
         if not user:
             raise serializers.ValidationError({"email": "User with this email does not exist."})
-        if user.password_reset_code != password_reset_code:
-            raise serializers.ValidationError({"password_reset_code": "Invalid password reset code"})
             
         return data
 

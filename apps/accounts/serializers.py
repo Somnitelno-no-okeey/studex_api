@@ -110,7 +110,6 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
     def validate(self, data):
         email = data['email']
-        password_reset_code = data['password_reset_code']
         
         user = User.objects.filter(email=email).first()
         

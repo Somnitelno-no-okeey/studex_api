@@ -15,7 +15,6 @@ class CustomUserCreationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         self._request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        # Делаем patronymic необязательным
         self.fields['patronymic'].required = False
 
     def clean_email(self):
@@ -130,22 +129,53 @@ class CustomUserAdmin(UserAdmin):
         super().save_model(request, obj, form, change)
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super().get_readonly_fields(request, obj)
+        """Делаем поля только для чтения для не-суперюзеров"""
+        readonly_fields = list(super().get_readonly_fields(request, obj))
         if not request.user.is_superuser:
-            readonly_fields = list(readonly_fields) + ['is_superuser']
+            pass
         return readonly_fields
+    
+    def get_fieldsets(self, request, obj=None):
+        """Скрываем поля groups, is_staff и is_superuser для не-суперюзеров"""
+        fieldsets = super().get_fieldsets(request, obj)
+        if not request.user.is_superuser:
+            modified_fieldsets = []
+            for name, options in fieldsets:
+                if name == _('Permissions'):
+                    fields = list(options['fields'])
+                    restricted_fields = ['groups', 'is_staff', 'is_superuser']
+                    for field in restricted_fields:
+                        if field in fields:
+                            fields.remove(field)
+                    modified_options = options.copy()
+                    modified_options['fields'] = tuple(fields)
+                    modified_fieldsets.append((name, modified_options))
+                else:
+                    modified_fieldsets.append((name, options))
+            return modified_fieldsets
+        return fieldsets
 
 class GroupAdmin(BaseGroupAdmin):
+    """Админ для групп с ограничением доступа только для суперюзеров"""
+    
     def has_add_permission(self, request):
+        """Разрешить добавление групп только суперюзерам"""
         return request.user.is_superuser
 
     def has_delete_permission(self, request, obj=None):
+        """Разрешить удаление групп только суперюзерам"""
         return request.user.is_superuser
 
     def has_change_permission(self, request, obj=None):
+        """Разрешить изменение групп только суперюзерам"""
+        return request.user.is_superuser
+    
+    def has_view_permission(self, request, obj=None):
+        """Разрешить просмотр групп только суперюзерам"""
         return request.user.is_superuser
     
     def has_module_permission(self, request):
+        """Показывать модуль групп в админке только суперюзерам"""
         return request.user.is_superuser
 
 admin.site.unregister(Group)

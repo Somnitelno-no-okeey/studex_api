@@ -12,7 +12,6 @@ class ReviewAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Если редактируем существующий объект
         if self.instance and self.instance.pk:
             discipline = self.instance.discipline
             self._hide_inactive_fields(discipline)
@@ -33,7 +32,6 @@ class ReviewAdminForm(forms.ModelForm):
         
         for field_name, is_active in criteria_fields.items():
             if not is_active and field_name in self.fields:
-                # Скрываем поле, но не удаляем его полностью
                 self.fields[field_name].widget = forms.HiddenInput()
                 self.fields[field_name].required = False
 
@@ -44,15 +42,30 @@ class ReviewAdmin(admin.ModelAdmin):
     list_display = ('user', 'discipline', 'avg_rating', 'anonymous')
     list_filter = ('discipline', 'anonymous')
     search_fields = ('user__username', 'discipline__name')
-    readonly_fields = ('avg_rating', 'discipline', 'user')  # Добавляем discipline и user в readonly
     
-    # Убираем возможность создавать новые отзывы через админку
     def has_add_permission(self, request):
         return False
     
+    def get_readonly_fields(self, request, obj=None):
+        """Динамически определяем readonly поля в зависимости от активных критериев"""
+        readonly_fields = ['avg_rating', 'discipline', 'user', 'anonymous']
+        
+        if obj:
+            discipline = obj.discipline
+    
+            criteria_fields = [
+                'interest', 'complexity', 'usefulness', 'workload', 
+                'logical_structure', 'practical_applicability', 
+                'teaching_effectiveness', 'materials_availability', 
+                'feedback_support'
+            ]
+            
+            readonly_fields.extend(criteria_fields)
+        
+        return readonly_fields
+    
     def get_fieldsets(self, request, obj=None):
         """Динамически формируем fieldsets в зависимости от активных критериев"""
-        # Только для редактирования существующих объектов
         if not obj:
             return []
         
@@ -61,8 +74,7 @@ class ReviewAdmin(admin.ModelAdmin):
         })
         
         discipline = obj.discipline
-        
-        # Формируем список активных критериев
+
         all_criteria = [
             ('interest', getattr(discipline, 'is_interest_active', True)),
             ('complexity', getattr(discipline, 'is_complexity_active', True)),
@@ -77,8 +89,9 @@ class ReviewAdmin(admin.ModelAdmin):
         
         criteria_fields = [field_name for field_name, is_active in all_criteria if is_active]
         
-        criteria_fieldset = ('Оценка по критериям', {
-            'fields': criteria_fields
+        criteria_fieldset = ('Оценка по критериям (только для просмотра)', {
+            'fields': criteria_fields,
+            'description': 'Оценки пользователей нельзя изменять через админку'
         }) if criteria_fields else None
         
         result_fieldset = ('Результат', {

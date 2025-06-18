@@ -36,25 +36,17 @@ class DisciplineListAPIView(generics.ListAPIView):
         
         if modules:
             try:
-                module_ids = [int(m) for m in modules if m.isdigit()]
+                module_ids = [int(m) for m in modules if m and str(m).isdigit()]
                 if module_ids:
                     queryset = queryset.filter(module_id__in=module_ids)
             except (ValueError, TypeError):
                 pass
         elif module:
-            if ',' in module:
-                try:
-                    module_ids = [int(m.strip()) for m in module.split(',') if m.strip().isdigit()]
-                    if module_ids:
-                        queryset = queryset.filter(module_id__in=module_ids)
-                except (ValueError, TypeError):
-                    pass
-            else:
-                try:
-                    module_id = int(module)
-                    queryset = queryset.filter(module_id=module_id)
-                except (ValueError, TypeError):
-                    pass
+            try:
+                module_id = int(module)
+                queryset = queryset.filter(module_id=module_id)
+            except (ValueError, TypeError):
+                pass
         
         if control_type:
             control_type_mapping = {

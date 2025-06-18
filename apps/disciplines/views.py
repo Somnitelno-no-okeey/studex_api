@@ -20,7 +20,7 @@ class DisciplineListAPIView(generics.ListAPIView):
         sort_by = self.request.query_params.get('sort_by', None)
         order = self.request.query_params.get('order', 'asc')
         rating = self.request.query_params.get('rating', None)
-        modules = self.request.query_params.getlist('modules')
+        modules = self.request.query_params.get('modules', None)
         control_type = self.request.query_params.get('control_type', None)
         discipline_format = self.request.query_params.get('discipline_format', None)
         search = self.request.query_params.get('search', None)
@@ -35,10 +35,11 @@ class DisciplineListAPIView(generics.ListAPIView):
 
         if modules:
             try:
-                module_ids = []
-                for m in modules:
-                    if m and str(m).isdigit():
-                        module_ids.append(int(m))
+                if ',' in modules:
+                    module_ids = [m.strip() for m in modules.split(',') if m.strip()]
+                else:
+                    module_ids = [modules.strip()] if modules.strip() else []
+                
                 if module_ids:
                     queryset = queryset.filter(module_id__in=module_ids)
             except (ValueError, TypeError):

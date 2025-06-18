@@ -46,7 +46,8 @@ class LoginAPIView(APIView):
     def post(self, request):
         serializer = LoginUserSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.validated_data
+            user = serializer.validated_data['user']
+
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
             refresh_token = str(refresh)
@@ -64,27 +65,27 @@ class LoginAPIView(APIView):
                 samesite="Lax",
                 max_age=30 * 24 * 60 * 60
             )
-
             return response
 
-        return Response(serializer.errors, status=400)
+        response = Response(serializer.errors, status=400)
+        response.delete_cookie("refresh_token")
+        return response
 
+
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 class LogoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
     def post(self, request):
         refresh_token = request.COOKIES.get("refresh_token")
-        if refresh_token:
-            try:
-                refresh = RefreshToken(refresh_token)
-                refresh.blacklist()
-            except Exception as e:
-                return Response({"error":"Error invalidating token:" + str(e) }, status=400)
         
         response = Response({"message": "Successfully logged out!"}, status=200)
-        response.delete_cookie("access_token")
-        response.delete_cookie("refresh_token")
+
+        response.delete_cookie("refresh_token", path='/', samesite='Lax')
         
-        return response    
+        return response
 
 class CookieTokenRefreshView(TokenRefreshView):
     """

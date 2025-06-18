@@ -39,13 +39,24 @@ class UserSerializer(serializers.ModelSerializer):
 
 class LoginUserSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, required=True)
     
     def validate(self, data):
-        user = authenticate(**data)
-        if user:
-            return user
-        raise serializers.ValidationError("Incorrect credentinls")
+        email = data.get('email')
+        password = data.get('password')
+        
+        if not email or not password:
+            raise serializers.ValidationError("Email and password are required")
+        
+        user = authenticate(email=email, password=password)
+        if not user:
+            raise serializers.ValidationError("Invalid email or password")
+        
+        if not user.is_active:
+            raise serializers.ValidationError("User account is disabled")
+            
+        data['user'] = user
+        return data
 
 class VerifyAccountSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)

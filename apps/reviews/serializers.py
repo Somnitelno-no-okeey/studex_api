@@ -1,11 +1,15 @@
+import os
+import re
+from better_profanity import profanity
 from rest_framework import serializers
 from .models import Review
 
-BAD_WORDS = ["badword1", "badword2", "плохое_слово"]
+# Получаем список плохих слов из переменной окружения
+BAD_WORDS = [word.strip() for word in os.getenv('BAD_WORDS', '').split(',') if word.strip()]
 
 CRITERIA_MAPPING = {
     'interest': 'Интересность дисциплины',
-    'complexity': 'Уровень сложности', 
+    'complexity': 'Уровень сложности',
     'usefulness': 'Полезность содержания',
     'workload': 'Объем нагрузки',
     'logical_structure': 'Логичность структуры',
@@ -16,20 +20,39 @@ CRITERIA_MAPPING = {
 }
 
 REVERSE_CRITERIA_MAPPING = {v: k for k, v in CRITERIA_MAPPING.items()}
+profanity.load_censor_words(BAD_WORDS)
 
+def contains_bad_words(text):
+    """
+    Проверяет текст на наличие плохих слов с учетом границ слов
+    чтобы избежать ложных срабатываний
+    """
+    if not text or not BAD_WORDS:
+        return profanity.contains_profanity(text)
+    
+    text_lower = text.lower()
+    
+    for bad_word in BAD_WORDS:
+        bad_word_lower = bad_word.lower()
+
+        pattern = r'\b' + re.escape(bad_word_lower) + r'\b'
+        if re.search(pattern, text_lower):
+            return True
+    
+    return False
 
 class ReviewSerializer(serializers.ModelSerializer):
     criteria = serializers.ListField(child=serializers.DictField(), write_only=True)
-
+    
     class Meta:
         model = Review
         fields = ['criteria', 'comment', 'anonymous']
         read_only_fields = ['average', 'user', 'discipline']
-
+    
     def validate(self, data):
         discipline = self.context['discipline']
         criteria_data = data.pop('criteria', [])
-        
+       
         criteria_dict = {}
         for item in criteria_data:
             criterion_verbose = item['criterion']
@@ -37,14 +60,14 @@ class ReviewSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"criteria": f"Неизвестный критерий: {criterion_verbose}"})
             field_name = REVERSE_CRITERIA_MAPPING[criterion_verbose]
             criteria_dict[field_name] = item['rating']
-        
+       
         required_fields = ['interest', 'complexity']
         for field in required_fields:
             if field not in criteria_dict:
                 raise serializers.ValidationError({field: f"Обязательное поле: {CRITERIA_MAPPING[field]}"})
             if not (1 <= criteria_dict[field] <= 5):
                 raise serializers.ValidationError({field: "Оценка обязательна от 1 до 5."})
-        
+       
         active_fields = {
             'usefulness': discipline.is_usefulness_active,
             'workload': discipline.is_workload_active,
@@ -54,7 +77,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             'materials_availability': discipline.is_materials_availability_active,
             'feedback_support': discipline.is_feedback_support_active,
         }
-        
+       
         for field, is_active in active_fields.items():
             if field in criteria_dict and not is_active:
                 raise serializers.ValidationError({"criteria": f"Критерий '{CRITERIA_MAPPING[field]}' неактивен для этой дисциплины"})
@@ -63,47 +86,46 @@ class ReviewSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError({field: f"Обязательное поле: {CRITERIA_MAPPING[field]}"})
                 if not (1 <= criteria_dict[field] <= 5):
                     raise serializers.ValidationError({field: "Обязательное поле: оценка от 1 до 5."})
-        
+       
         user = self.context['request'].user
         if self.instance is None:
             if Review.objects.filter(user=user, discipline=discipline).exists():
                 raise serializers.ValidationError("Вы уже оставляли отзыв на эту дисциплину")
-        
+       
         for field, rating in criteria_dict.items():
             data[field] = rating
             data[f'is_{field}_active'] = True
-        
+       
         for field in active_fields:
             if field not in criteria_dict:
                 data[f'is_{field}_active'] = False
-        
+       
         data['is_interest_active'] = True
         data['is_complexity_active'] = True
 
         comment = data.get('comment', '') or ''
-        if any(bad_word in comment.lower() for bad_word in BAD_WORDS):
+        if contains_bad_words(comment):
             raise serializers.ValidationError({"comment": "Комментарий содержит недопустимые выражения."})
-
+        
         return data
-
 
 class ReviewListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     criteria = serializers.SerializerMethodField()
     avg_rating = serializers.FloatField(read_only=True)
     created_at = serializers.DateTimeField(format="%d.%m.%Y", read_only=True)
-
+    
     class Meta:
         model = Review
         fields = ['id', 'user', 'criteria', 'comment', 'created_at', 'avg_rating']
-
+    
     def get_user(self, obj):
         return "Аноним" if obj.anonymous else obj.user.get_full_name()
-
+    
     def get_criteria(self, obj):
         discipline = obj.discipline
         criteria = []
-
+        
         fields = [
             ('interest', True),
             ('complexity', True),
@@ -115,12 +137,13 @@ class ReviewListSerializer(serializers.ModelSerializer):
             ('materials_availability', discipline.is_materials_availability_active),
             ('feedback_support', discipline.is_feedback_support_active),
         ]
-
+        
         for field_name, is_active in fields:
             if is_active:
                 criteria.append({
                     "criterion": CRITERIA_MAPPING[field_name],
                     "rating": getattr(obj, field_name)
                 })
-
+        
         return criteria
+    

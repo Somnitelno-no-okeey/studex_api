@@ -23,8 +23,9 @@ def calculate_average_on_pre_save(sender, instance, **kwargs):
         scores.append(instance.materials_availability)
     if instance.is_feedback_support_active:
         scores.append(instance.feedback_support)
-    
+   
     if scores:
-        instance.avg_rating = sum(scores) / len(scores) 
+        avg = sum(scores) / len(scores)
+        instance.avg_rating = round(avg, 1)
     else:
         instance.avg_rating = 0

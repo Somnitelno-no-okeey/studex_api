@@ -21,6 +21,7 @@ class DisciplineListAPIView(generics.ListAPIView):
         order = self.request.query_params.get('order', 'asc')
         rating = self.request.query_params.get('rating', None)
         module = self.request.query_params.get('module', None)
+        modules = self.request.query_params.getlist('modules')
         control_type = self.request.query_params.get('control_type', None)
         discipline_format = self.request.query_params.get('discipline_format', None)
         search = self.request.query_params.get('search', None)
@@ -32,8 +33,28 @@ class DisciplineListAPIView(generics.ListAPIView):
                     queryset = queryset.filter(avg_rating__gte=rating_value)
             except (ValueError, TypeError):
                 pass
-        if module:
-            queryset = queryset.filter(module_id=module)
+        
+        if modules:
+            try:
+                module_ids = [int(m) for m in modules if m.isdigit()]
+                if module_ids:
+                    queryset = queryset.filter(module_id__in=module_ids)
+            except (ValueError, TypeError):
+                pass
+        elif module:
+            if ',' in module:
+                try:
+                    module_ids = [int(m.strip()) for m in module.split(',') if m.strip().isdigit()]
+                    if module_ids:
+                        queryset = queryset.filter(module_id__in=module_ids)
+                except (ValueError, TypeError):
+                    pass
+            else:
+                try:
+                    module_id = int(module)
+                    queryset = queryset.filter(module_id=module_id)
+                except (ValueError, TypeError):
+                    pass
         
         if control_type:
             control_type_mapping = {
